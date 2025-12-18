@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Сервисный Центр "IT-Сфера"{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Учет заявок на ремонт климатического оборудования</h1>
+        <nav>
+            {% if g.user %}
+                <span>Вы вошли как: <strong>{{ g.user['fio'] }}</strong> ({{ g.user['role'] }})</span>
+                <a href="{{ url_for('index') }}">Главная</a>
+
+                <!-- Для менеджера по качеству -->
+                {% if g.user['role'] == 'quality_manager' %}
+                  <a href="{{ url_for('overdue_requests') }}">Просроченные</a>
+                  <a href="{{ url_for('quality_stats') }}">Качество</a>
+                {% endif %}
+
+                <!-- Ссылка "Пользователи" - для админов, операторов и менеджеров -->
+                {% if g.user['role'] in ['admin', 'operator', 'manager'] %}
+                    <a href="{{ url_for('users') }}">Пользователи</a>
+                {% endif %}
+                
+                <!-- Ссылка "Мастера" - для админов, операторов и менеджеров -->
+                {% if g.user['role'] in ['admin', 'operator', 'manager'] %}
+                    <a href="{{ url_for('masters') }}">Мастера</a>
+                {% endif %}
+                
+                <!-- Ссылка "Статистика" - для админов, операторов и менеджеров -->
+                {% if g.user['role'] in ['admin', 'operator', 'manager'] %}
+                    <a href="{{ url_for('stats') }}">Статистика</a>
+                {% endif %}
+                
+                <!-- Ссылка "Создать заявку" - для клиентов, операторов и админов -->
+                {% if g.user['role'] in ['client', 'operator', 'admin'] %}
+                    <a href="{{ url_for('create_request') }}">Создать заявку</a>
+                {% endif %}
+                
+                <a href="{{ url_for('logout') }}">Выйти</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>ООО "Конди" &copy; 2023</p>
+    </footer>
+</body>
+</html>

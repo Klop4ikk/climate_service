@@ -1,0 +1,52 @@
+{% extends 'layout.html' %}
+
+{% block title %}Проблемные заявки{% endblock %}
+
+{% block content %}
+    <h2>Проблемные заявки</h2>
+    
+    {% if not requests %}
+        <p class="text-muted">Нет проблемных заявок.</p>
+    {% else %}
+        <table class="requests-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Дата</th>
+                    <th>Клиент</th>
+                    <th>Проблема</th>
+                    <th>Мастер</th>
+                    <th>Статус</th>
+                    <th>Комментарии</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr>
+                    <td>{{ req['id'] }}</td>
+                    <td>{{ req['created_date'][:10] }}</td>
+                    <td>{{ req['client_fio'] }}</td>
+                    <td>{{ req['problem_description'][:50] }}...</td>
+                    <td>{{ req['specialist_fio'] or 'Не назначен' }}</td>
+                    <td>
+                        <span class="status status-{{ req['status'] }}">
+                            {% if req['status'] == 'waiting_parts' %}Ожидание запчастей
+                            {% else %}Проблема{% endif %}
+                        </span>
+                    </td>
+                    <td>{{ req['comment_count'] or 0 }}</td>
+                    <td>
+                        <a href="{{ url_for('request_detail', request_id=req['id']) }}" class="btn-small">Подробнее</a>
+                        {% if g.user['role'] in ['quality_manager', 'admin', 'manager'] %}
+                            <a href="{{ url_for('add_specialist', request_id=req['id']) }}" class="btn-small btn-warning">+Специалист</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    
+    <a href="{{ url_for('index') }}" class="btn">Назад</a>
+{% endblock %}

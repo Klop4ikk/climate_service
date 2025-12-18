@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+
+{% block title %}Просроченные заявки{% endblock %}
+
+{% block content %}
+    <h2>Просроченные заявки</h2>
+    
+    {% if not requests %}
+        <p class="text-muted">Нет просроченных заявок.</p>
+    {% else %}
+        <table class="requests-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Дней в работе</th>
+                    <th>Клиент</th>
+                    <th>Оборудование</th>
+                    <th>Мастер</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr>
+                    <td>{{ req['id'] }}</td>
+                    <td>
+                        <span class="overdue-badge">{{ req['days_passed']|round|int }} дней</span>
+                    </td>
+                    <td>{{ req['client_fio'] }}</td>
+                    <td>{{ req['equipment_type'] }}</td>
+                    <td>{{ req['specialist_fio'] or 'Не назначен' }}</td>
+                    <td>
+                        <span class="status status-{{ req['status'] }}">
+                            {% if req['status'] == 'in_progress' %}В работе
+                            {% elif req['status'] == 'waiting_parts' %}Ожидание запчастей
+                            {% else %}{{ req['status'] }}{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('request_detail', request_id=req['id']) }}" class="btn-small">Подробнее</a>
+                        {% if g.user['role'] in ['quality_manager', 'admin'] %}
+                            <a href="{{ url_for('extend_deadline', request_id=req['id']) }}" class="btn-small btn-warning">Продлить</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    
+    <a href="{{ url_for('index') }}" class="btn">Назад</a>
+{% endblock %}

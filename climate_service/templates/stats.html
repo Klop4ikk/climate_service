@@ -1,0 +1,51 @@
+{% extends 'layout.html' %}
+
+{% block title %}Статистика работы{% endblock %}
+
+{% block content %}
+    <h2>Статистика работы сервисной службы</h2>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Всего заявок</h3>
+            <div class="stat-number">{{ total_requests }}</div>
+        </div>
+        
+        <div class="stat-card">
+            <h3>Выполнено</h3>
+            <div class="stat-number">{{ completed_requests }}</div>
+        </div>
+        
+        <div class="stat-card">
+            <h3>В работе</h3>
+            <div class="stat-number">{{ in_progress_requests }}</div>
+        </div>
+        
+        <div class="stat-card">
+            <h3>Среднее время</h3>
+            <div class="stat-number">{{ avg_days }} дней</div>
+        </div>
+    </div>
+    
+    <div class="stats-section">
+        <h3>Статистика по типам оборудования</h3>
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th>Тип оборудования</th>
+                    <th>Количество заявок</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in equipment_stats %}
+                <tr>
+                    <td>{{ stat['equipment_type'] }}</td>
+                    <td>{{ stat['count'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <a href="{{ url_for('index') }}" class="btn">Назад к списку заявок</a>
+{% endblock %}

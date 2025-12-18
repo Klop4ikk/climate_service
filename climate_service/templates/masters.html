@@ -1,0 +1,46 @@
+{% extends 'layout.html' %}
+
+{% block title %}Управление мастерами{% endblock %}
+
+{% block content %}
+    <h2>Управление мастерами</h2>
+    
+    <div class="stats-card">
+        <h3>Статистика</h3>
+        <p>Заявок без мастера: <strong>{{ unassigned_requests }}</strong></p>
+    </div>
+    
+    <table class="masters-table">
+        <thead>
+            <tr>
+                <th>ФИО</th>
+                <th>Телефон</th>
+                <th>Активные заявки</th>
+                <th>Выполнено</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for master in masters %}
+            <tr>
+                <td>{{ master['fio'] }}</td>
+                <td>{{ master['phone'] }}</td>
+                <td>
+                    <span class="badge {% if master['active_requests'] > 3 %}badge-danger
+                                      {% elif master['active_requests'] > 0 %}badge-warning
+                                      {% else %}badge-success{% endif %}">
+                        {{ master['active_requests'] or 0 }}
+                    </span>
+                </td>
+                <td>{{ master['completed_requests'] or 0 }}</td>
+                <td>
+                    <a href="#" class="btn-small">Заявки</a>
+                    <a href="#" class="btn-small btn-primary">Назначить</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <a href="{{ url_for('index') }}" class="btn">Назад</a>
+{% endblock %}

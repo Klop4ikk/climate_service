@@ -1,0 +1,142 @@
+<!-- templates/request_detail.html - ИСПРАВЛЕННАЯ ВЕРСИЯ -->
+{% extends 'layout.html' %}
+
+{% block title %}Заявка #{{ request.id }}{% endblock %}
+
+{% block content %}
+    <h2>Заявка #{{ request.id }}</h2>
+    
+    <div class="request-info">
+        <div class="info-section">
+            <h3>Информация о заявке</h3>
+            <p><strong>Дата создания:</strong> {{ request.created_date }}</p>
+            <p><strong>Клиент:</strong> {{ request.client_fio }}</p>
+            <p><strong>Оборудование:</strong> {{ request.equipment_type }} {{ request.equipment_model }}</p>
+            <p><strong>Описание проблемы:</strong> {{ request.problem_description }}</p>
+            <p><strong>Статус:</strong> 
+                <span class="status status-{{ request.status }}">
+                    {% if request.status == 'new' %}Новая
+                    {% elif request.status == 'in_progress' %}В работе
+                    {% elif request.status == 'waiting_parts' %}Ожидание запчастей
+                    {% elif request.status == 'completed' %}Завершена
+                    {% elif request.status == 'cancelled' %}Отменена
+                    {% else %}{{ request.status }}{% endif %}
+                </span>
+            </p>
+            
+            <p><strong>Назначенный специалист:</strong> 
+                {% if request.specialist_fio %}
+                    {{ request.specialist_fio }}
+                {% else %}
+                    <span class="text-muted">Не назначен</span>
+                {% endif %}
+            </p>
+            
+            {% if request.completion_date %}
+                <p><strong>Дата завершения:</strong> {{ request.completion_date }}</p>
+            {% endif %}
+            
+            {% if request.repair_parts %}
+                <p><strong>Запчасти:</strong> {{ request.repair_parts }}</p>
+            {% endif %}
+        </div>
+        
+        <!-- Блок управления статусом -->
+        {% if g.user['role'] in ['operator', 'admin', 'manager'] or 
+              (g.user['role'] == 'specialist' and request.assigned_specialist_id == g.user['id']) %}
+        <div class="action-section">
+            <h3>Управление заявкой</h3>
+            
+            <!-- Форма изменения статуса -->
+            <form method="post" action="{{ url_for('change_status', request_id=request.id) }}" class="inline-form">
+                <div class="form-group">
+                    <label for="status">Изменить статус:</label>
+                    <select name="status" id="status" class="form-select-sm">
+                        <option value="new" {% if request.status == 'new' %}selected{% endif %}>Новая</option>
+                        <option value="in_progress" {% if request.status == 'in_progress' %}selected{% endif %}>В работе</option>
+                        <option value="waiting_parts" {% if request.status == 'waiting_parts' %}selected{% endif %}>Ожидание запчастей</option>
+                        <option value="completed" {% if request.status == 'completed' %}selected{% endif %}>Завершена</option>
+                        <option value="cancelled" {% if request.status == 'cancelled' %}selected{% endif %}>Отменена</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-primary">Сохранить</button>
+                </div>
+            </form>
+            
+            <!-- Форма назначения мастера (для операторов, админов, менеджеров) -->
+            {% if g.user['role'] in ['operator', 'admin', 'manager', 'quality_manager'] %}
+            <form method="post" action="{{ url_for('assign_master', request_id=request.id) }}" class="inline-form mt-2">
+                <div class="form-group">
+                    <label for="master_id">Назначить мастера:</label>
+                    <select name="master_id" id="master_id" class="form-select-sm">
+                        <option value="">Выберите мастера</option>
+                        {% set masters = [
+                            {'id': 2, 'name': 'Кудрявцева Ева Ивановна'},
+                            {'id': 3, 'name': 'Гончарова Ульяна Ярославовна'},
+                            {'id': 10, 'name': 'Беспалова Екатерина Даниэльевна'}
+                        ] %}
+                        {% for master in masters %}
+                        <option value="{{ master.id }}" 
+                            {% if request.assigned_specialist_id == master.id %}selected{% endif %}>
+                            {{ master.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-success">Назначить</button>
+                </div>
+            </form>
+            {% endif %}
+            
+            <!-- Кнопка "Взять в работу" для специалистов -->
+            {% if g.user['role'] == 'specialist' and not request.assigned_specialist_id %}
+            <form method="post" action="{{ url_for('take_request', request_id=request.id) }}" class="mt-2">
+                <button type="submit" class="btn btn-sm btn-warning">Взять в работу</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Форма добавления комментария -->
+    {% if g.user['role'] in ['specialist', 'operator', 'admin', 'manager', 'quality_manager'] %}
+    <div class="comment-form-section">
+        <h3>Добавить комментарий</h3>
+        <form method="post" action="{{ url_for('add_comment', request_id=request.id) }}">
+            <div class="form-group">
+                <textarea name="message" rows="3" placeholder="Введите ваш комментарий..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Добавить комментарий</button>
+        </form>
+    </div>
+    {% endif %}
+    
+    <div class="comments-section">
+        <h3>Комментарии ({{ comments|length }})</h3>
+        {% if comments %}
+            {% for comment in comments %}
+                <div class="comment">
+                    <div class="comment-header">
+                        <strong>{{ comment.author_fio }}</strong>
+                        <small>{{ comment.created_at }}</small>
+                    </div>
+                    <div class="comment-body">
+                        {{ comment.message }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">Комментариев пока нет.</p>
+        {% endif %}
+    </div>
+    
+    <a href="{{ url_for('index') }}" class="btn">Назад к списку</a>
+{% endblock %}
+<!-- Добавьте этот блок после информации о заявке -->
+{% if g.user['role'] in ['operator', 'admin', 'quality_manager'] and request.status == 'completed' %}
+<div class="feedback-section">
+    <h3>Оценка качества</h3>
+    <p>Сгенерируйте QR-код для оценки работы клиентом:</p>
+    <a href="{{ url_for('feedback_page', request_id=request.id) }}" class="btn btn-info">
+        📱 QR-код для оценки
+    </a>
+</div>
+{% endif %}

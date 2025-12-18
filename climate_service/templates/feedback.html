@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+
+{% block title %}Оценка работы - Заявка #{{ request.id }}{% endblock %}
+
+{% block content %}
+    <h2>Оценка качества работы</h2>
+    
+    <div class="feedback-info">
+        <div class="info-section">
+            <h3>Заявка #{{ request.id }}</h3>
+            <p><strong>Оборудование:</strong> {{ request.equipment_type }} {{ request.equipment_model }}</p>
+            <p><strong>Дата завершения:</strong> {{ request.completion_date or 'Не завершена' }}</p>
+            <p><strong>Клиент:</strong> {{ request.client_fio }}</p>
+        </div>
+        
+        <div class="qr-section">
+            <h3>QR-код для оценки</h3>
+            <p>Отсканируйте QR-код для перехода к форме оценки:</p>
+            
+            <div class="qr-container">
+                <img src="{{ url_for('generate_feedback_qr', request_id=request.id) }}" 
+                     alt="QR-код для оценки" class="qr-image">
+            </div>
+            
+            <p class="qr-instructions">
+                <strong>Инструкция:</strong><br>
+                1. Откройте камеру телефона<br>
+                2. Наведите на QR-код<br>
+                3. Перейдите по ссылке<br>
+                4. Заполните форму оценки
+            </p>
+            
+            <div class="feedback-link">
+                <p>Или перейдите по ссылке:</p>
+                <a href="{{ feedback_url }}" target="_blank" class="btn">
+                    📝 Открыть форму оценки
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <a href="{{ url_for('request_detail', request_id=request.id) }}" class="btn">Назад к заявке</a>
+{% endblock %}

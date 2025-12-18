@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+
+{% block title %}Создание заявки{% endblock %}
+
+{% block content %}
+    <h2>Создание новой заявки</h2>
+    
+    <form method="post" class="request-form">
+        <div class="form-group">
+            <label for="equipment_type">Тип оборудования:</label>
+            <select id="equipment_type" name="equipment_type" required>
+                <option value="">Выберите тип</option>
+                <option value="Кондиционер">Кондиционер</option>
+                <option value="Увлажнитель воздуха">Увлажнитель воздуха</option>
+                <option value="Осушитель воздуха">Осушитель воздуха</option>
+                <option value="Вентиляционная система">Вентиляционная система</option>
+                <option value="Сушилка для рук">Сушилка для рук</option>
+                <option value="Обогреватель">Обогреватель</option>
+                <option value="Тепловая завеса">Тепловая завеса</option>
+                <option value="Другое">Другое</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="equipment_model">Модель устройства:</label>
+            <input type="text" id="equipment_model" name="equipment_model" required 
+                   placeholder="Например: TCL TAC-12CHSA/TPG-W белый">
+        </div>
+        
+        <div class="form-group">
+            <label for="problem_description">Описание проблемы:</label>
+            <textarea id="problem_description" name="problem_description" required 
+                      placeholder="Подробно опишите проблему..."></textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-success">Создать заявку</button>
+        <a href="{{ url_for('index') }}" class="btn">Отмена</a>
+    </form>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'layout.html' %}
+
+{% block title %}Редактирование заявки #{{ request.id }}{% endblock %}
+
+{% block content %}
+    <h2>Редактирование заявки #{{ request.id }}</h2>
+    
+    <form method="post" class="request-form">
+        <div class="form-group">
+            <label>Клиент:</label>
+            <input type="text" value="{{ request.client_fio }}" readonly class="form-control-plaintext">
+        </div>
+        
+        <div class="form-group">
+            <label>Оборудование:</label>
+            <input type="text" value="{{ request.equipment_type }} {{ request.equipment_model }}" readonly class="form-control-plaintext">
+        </div>
+        
+        <div class="form-group">
+            <label>Описание проблемы:</label>
+            <textarea readonly class="form-control-plaintext">{{ request.problem_description }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="status">Статус:</label>
+            <select id="status" name="status" required>
+                <option value="new" {% if request.status == 'new' %}selected{% endif %}>Новая</option>
+                <option value="in_progress" {% if request.status == 'in_progress' %}selected{% endif %}>В работе</option>
+                <option value="waiting_parts" {% if request.status == 'waiting_parts' %}selected{% endif %}>Ожидание запчастей</option>
+                <option value="completed" {% if request.status == 'completed' %}selected{% endif %}>Завершена</option>
+                <option value="cancelled" {% if request.status == 'cancelled' %}selected{% endif %}>Отменена</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="assigned_specialist_id">Назначенный специалист:</label>
+            <select id="assigned_specialist_id" name="assigned_specialist_id">
+                <option value="">Не назначен</option>
+                {% for specialist in specialists %}
+                <option value="{{ specialist['id'] }}" 
+                    {% if request.assigned_specialist_id == specialist['id'] %}selected{% endif %}>
+                    {{ specialist['fio'] }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="repair_parts">Запчасти:</label>
+            <textarea id="repair_parts" name="repair_parts" 
+                      placeholder="Информация о запчастях...">{{ request.repair_parts or '' }}</textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-success">Сохранить изменения</button>
+        <a href="{{ url_for('request_detail', request_id=request.id) }}" class="btn">Отмена</a>
+    </form>
+{% endblock %}
